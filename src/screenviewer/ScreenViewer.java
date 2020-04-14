@@ -77,7 +77,7 @@ public class ScreenViewer extends JFrame {
             Robot robot = new Robot();
             BufferedImage bi = robot.createScreenCapture(new Rectangle(1920, 1080));// pegar toda a minha tela a resolução é de cada um, pesquisar como saber.., tem 
             
-            byte buffer[] = getBlock(bi,50,1);
+            byte buffer[] = getBlock(bi,50,0,1);
             
             
             xoffset =10;
@@ -96,11 +96,11 @@ public class ScreenViewer extends JFrame {
     }
     
     
-public static byte[] getBlock( BufferedImage bi, int size,int offset){
+public static byte[] getBlock( BufferedImage bi, int size,int offsetx, int offsety){
     byte buffer[] = new byte[size * size * 4]; // a r g b  (a=alpha)
     int aux = 0; 
-    for (int i = xoffset; i < (size*(offset+1)); i++) {
-        for (int j = yoffset ; j < (size*(offset+1)); j++) {
+    for (int i = offsetx*size; i < (size*(offsetx+1)); i++) {
+        for (int j = offsety*size ; j < (size*(offsety+1)); j++) {
 
             Color cor = new Color(bi.getRGB(i, j));
 
