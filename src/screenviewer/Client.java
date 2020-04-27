@@ -22,7 +22,7 @@ import static screenviewer.ScreenViewer.xlen;
 public class Client {
 
     public static final int PORTA = 5000;
-    public static final int TAM_BUFFER = 51200;
+    public static final int TAM_BUFFER = 40960;
 
     public static void main(String[] args) {
         try {
@@ -42,65 +42,105 @@ public class Client {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             byte[] buffer;
             DatagramPacket sendPacket;
+            boolean sending = false;
+            byte number =0;
             while (true) {
+                
                 bi = robot.createScreenCapture(new Rectangle(screenSize.width, screenSize.height));
                 buffer = getBlock(bi,screenSize);
-                buffer = compress(buffer);
+                byte block = 0;
+//                System.out.println(buffer.length
+//                buffer = compress(buffer
+                System.out.println(buffer.length);
                 
                 //Header
-                bufferSaida = new byte[5];
-                bufferSaida[0] = (byte) 0xAA;
-                bufferSaida[1] = (byte) 0xFF;
-                bufferSaida[2] = (byte) 0xFF;
-                bufferSaida[3] = (byte) 0xFF;
-                bufferSaida[4] = (byte) 0xAA;
-                
-                sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, IpServidor, PORTA);
-                clientSocket.send(sendPacket);
-                
-                if(buffer.length > 51200)
+                if(!sending)
                 {
-                    bufferSaida = new byte[51200];
-                    
-                    int i =0;
-                    int aux =0;
-                    while(i< buffer.length)
-                    {
-                        bufferSaida[aux] = buffer[aux++]; 
-                        if(aux >= 51200)
-                        {
-                          
-                           sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, IpServidor, PORTA);
-                           clientSocket.send(sendPacket); 
-                           
-                           bufferSaida = new byte[51200]; 
-                           aux =0; 
-                        }
-                        i++;
-                    }
-                    
+                    System.out.println("start header");
+                    bufferSaida = new byte[5];
+                    bufferSaida[0] = (byte) 0xAA;
+                    bufferSaida[1] = (byte) 0xFF;
+                    bufferSaida[2] = (byte) 0xFF;
+                    bufferSaida[3] = (byte) 0xFF;
+                    bufferSaida[4] = (byte) 0xAA;
+
                     sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, IpServidor, PORTA);
                     clientSocket.send(sendPacket);
+                    
                 }
                 
                 
-                
+                DatagramPacket receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);
+                clientSocket.receive(receivePacket);
+
+                String respostaServidor = new String(receivePacket.getData(),0,receivePacket.getLength());
             
+                if(buffer.length > 40960 && respostaServidor.equals("receipt"))
+                {
+                    System.out.println("Start generate package");
+                    bufferSaida = new byte[40960];
+                    
+                    int i =0;
+                    int aux =0;
+                    
+                    while(i< buffer.length)
+                    {
+                        
+                        sending = true;
+                        
+                        bufferSaida[aux++] = buffer[i]; 
+                        
+                        if(aux == 40959)
+                        {
+//                            System.out.println("Envindo");;
+                            byte[] snd = build(bufferSaida, block++);
+                            
+                            sendPacket = new DatagramPacket(snd, snd.length, IpServidor, PORTA);
+                            clientSocket.send(sendPacket); 
+                           
+                            receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);
+                            clientSocket.receive(receivePacket);
+                            respostaServidor = new String(receivePacket.getData(),0,receivePacket.getLength());
+
+                           if((buffer.length-i) >40960){
+                               bufferSaida = new byte[40960];
+                           }else
+                           {
+                               System.out.println("resto");
+                               bufferSaida = new byte[buffer.length-(i+1)];
+                           }
+                            
+                           aux =0; 
+                        }
+                        i++;     
+                    }
+     
+                    byte[] snd = build(bufferSaida, block++);
+                    
+                    sendPacket = new DatagramPacket(snd, snd.length, IpServidor, PORTA);
+                    clientSocket.send(sendPacket);
+                    
+                    receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);
+                    clientSocket.receive(receivePacket);
+                    respostaServidor = new String(receivePacket.getData(),0,receivePacket.getLength());
+                              
+                    sending =  false;                    
+                }  
             }
-            
-            
-//            DatagramPacket receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);;
-//            clientSocket.receive(receivePacket);
-
-//            String respostaServidor = new String(receivePacket.getData());
-//            System.out.println("Servidor respondeu:" + respostaServidor);;
-//            clientSocket.close
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
+    public static byte[] build(byte[] data,byte index)
+    {
+        byte[] r  = new byte[data.length+1];
+        r[0] = index;
+        for (int i = 1; i < data.length+1; i++) {
+            r[i] = (byte)(data[i-1] & 0xFF);
+        }
+        return r;
+    }
   
     
     public static byte[] compress(byte[] data) throws IOException {  
@@ -115,8 +155,8 @@ public class Client {
         }
         outputStream.close();
         byte[] output = outputStream.toByteArray();
-        System.out.println("Original: " + data.length / 1024 + " Kb");
-        System.out.println("Compressed: " + output.length / 1024 + " Kb");  
+//        System.out.println("Original: " + data.length / 1024 + " Kb");;;
+//        System.out.println("Compressed: " + output.length / 1024 + " Kb");  
         return output;  
     }
     

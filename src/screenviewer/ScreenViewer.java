@@ -38,8 +38,8 @@ public class ScreenViewer extends JFrame {
     
     static int xoffset = 0;
     static int yoffset = 0;
-    static int xlen = 0;
-    static int ylen = 0;
+    static int xlen = 1920;
+    static int ylen = 1080;
 
     ScreenViewer(byte buffer[]) {
         this.buffer = buffer;
@@ -47,24 +47,28 @@ public class ScreenViewer extends JFrame {
         setTitle("Screen viewer");
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         
-        this.repaint();
+//        this.repaint();;
         
         
     }
 
     @Override
     public void paint(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        int scale = 1;       
-        int aux = 0;
-        for (int i = 0; i < xlen; i++) {
-            for (int j = 0; j < ylen; j++) {
-                // porque & 0xFF --> byte -128 a 127 .... 
-                // int i = 255;  byte b = (byte) i; <- -1
-                //r g b a
-                Color cor = new Color(buffer[aux++] & 0xFF, buffer[aux++] & 0xFF, buffer[aux++] & 0xFF, buffer[aux++] & 0xFF);                
-                g2.setColor(cor);
-                g2.drawRect(xoffset + i * scale, yoffset + j * scale, scale, scale);
+        if(buffer != null)
+        {
+            
+            Graphics2D g2 = (Graphics2D) g;
+            int scale = 1;       
+            int aux = 0;
+            for (int i = 0; i < xlen; i++) {
+                for (int j = 0; j < ylen; j++) {
+                    // porque & 0xFF --> byte -128 a 127 .... 
+                    // int i = 255;  byte b = (byte) i; <- -1
+                    //r g b a
+                    Color cor = new Color(buffer[aux++] & 0xFF, buffer[aux++] & 0xFF, buffer[aux++] & 0xFF, buffer[aux++] & 0xFF);                
+                    g2.setColor(cor);
+                    g2.drawRect(xoffset + i * scale, yoffset + j * scale, scale, scale);
+                }
             }
         }
     }
@@ -73,27 +77,27 @@ public class ScreenViewer extends JFrame {
         
 
         try {
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            
-            Robot robot = new Robot();
-            BufferedImage bi = robot.createScreenCapture(new Rectangle(screenSize.width, screenSize.height));// pegar toda a minha tela a resolução é de cada um, pesquisar como saber.., tem 
-            
-            int h = screenSize.height;
-            ylen = h;
-            int w = screenSize.width;
-            xlen = w;
-            int size = (h/10)*(w/10);
-            
-            byte buffer[] = getBlock(bi);
-            
-            byte buffer2[] = compress(buffer);
-                
-            xoffset =10;
-            yoffset =35;         
-            ScreenViewer m = new ScreenViewer(decompress(buffer2));
-            
-           
-            m.setVisible(true);
+//            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//            
+//            Robot robot = new Robot();
+//            BufferedImage bi = robot.createScreenCapture(new Rectangle(screenSize.width, screenSize.height));// pegar toda a minha tela a resolução é de cada um, pesquisar como saber.., tem 
+//            
+//            int h = screenSize.height;
+//            ylen = h;
+//            int w = screenSize.width;
+//            xlen = w;
+//            int size = (h/10)*(w/10);
+//            
+//            byte buffer[] = getBlock(bi);
+//            
+//            byte buffer2[] = compress(buffer);
+//                
+//            xoffset =10;
+//            yoffset =35;         
+//            ScreenViewer m = new ScreenViewer(decompress(buffer2));
+//            
+//           
+//            m.setVisible(true);
             
 //            while (true) {;
 //                bi = robot.createScreenCapture(new Rectangle(screenSize.width, screenSize.height));
