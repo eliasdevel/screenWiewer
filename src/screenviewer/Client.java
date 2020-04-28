@@ -50,8 +50,8 @@ public class Client {
                 buffer = getBlock(bi,screenSize);
                 byte block = 0;
 //                System.out.println(buffer.length
-//                buffer = compress(buffer
-                System.out.println(buffer.length);
+                buffer = compress(buffer);
+                System.out.println("b Length" + buffer.length);
                 
                 //Header
                 if(!sending)
@@ -125,7 +125,8 @@ public class Client {
                     respostaServidor = new String(receivePacket.getData(),0,receivePacket.getLength());
                               
                     sending =  false;                    
-                }  
+                }
+                Thread.sleep(1);
             }
         } catch (Exception e) {
             e.printStackTrace();

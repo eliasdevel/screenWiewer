@@ -45,8 +45,8 @@ public class Server {
                 
 //                String recebido = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 byte recebido[] = receivePacket.getData();
-             
                 
+                //Header
                 if(receivePacket.getLength() == 5 && 
                         ((recebido[0] & 0xFF) == 0xAA &&
                         (recebido[1] & 0xFF) == 0xFF && (recebido[2] & 0xFF)== 0xFF && 
@@ -60,7 +60,6 @@ public class Server {
                         int x =0;
 
                         for (int i = 0; i < n_pack; i++) {
-   
                             for (int j = 0; j < imageBuffer[i].length; j++) {
                                 imageBytes[x++] = imageBuffer[i][j];
                             }
@@ -68,8 +67,8 @@ public class Server {
                         
 //                        System.out.println(size);
 //                        System.out.println(imageBytes.length);
-//                        m.buffer = decompress(imageBytes);
-                        m.buffer = imageBytes;
+                        m.buffer = decompress(imageBytes);
+//                        m.buffer = imageBytes;;
                         
                         if(m.buffer != null)
                         {
@@ -90,7 +89,7 @@ public class Server {
 //                    System.out.println(receivePacket.getLength());
                     int aux = 0;
 //                    System.out.println(recebido[0]);;
-                    imageBuffer[recebido[0]& 0xFF] = new byte[receivePacket.getLength()];
+                    imageBuffer[recebido[0]& 0xFF] = new byte[receivePacket.getLength()-1];
                     for (int i = 1; i < receivePacket.getLength(); i++) {
                         imageBuffer[recebido[0]& 0xFF][aux++] = (byte) (recebido[i] & 0xFF);
                     }
